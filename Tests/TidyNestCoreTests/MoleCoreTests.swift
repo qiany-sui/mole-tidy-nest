@@ -181,7 +181,7 @@ struct MoleCoreTests {
         } catch { Issue.record("错误类型不正确") }
     }
 
-    @Test(arguments: ["1.53.0", "1.54.0", "1.56.1"])
+    @Test(arguments: ["1.53.0", "1.54.0", "1.56.1", "1.59.1"])
     func serviceDetectsAndUsesOnlyReadOnlyQueries(version: String) async throws {
         let fixture = try ScriptFixture(#"""
         if [ "$#" = 1 ] && [ "$1" = --version ]; then
@@ -280,7 +280,7 @@ struct MoleCoreTests {
         #expect(!FileManager.default.fileExists(atPath: fixture.script.path + ".queried"))
     }
 
-    @Test(arguments: [("1.53.0", "1.54.0"), ("1.54.0", "1.56.1")])
+    @Test(arguments: [("1.53.0", "1.54.0"), ("1.54.0", "1.56.1"), ("1.56.1", "1.59.1")])
     func queryAcceptsUpgradeToAnotherVerifiedVersion(versions: (String, String)) async throws {
         let fixture = try ScriptFixture(#"""
         if [ "$1" = --version ]; then
@@ -307,7 +307,7 @@ struct MoleCoreTests {
         catch { Issue.record("错误类型不正确") }
     }
 
-    @Test(arguments: ["1.52.0", "1.53.1", "1.54.1", "1.55.0", "1.56.0", "1.56.2", "2.0.0", "1.54.0-beta", "1.56.1-beta"])
+    @Test(arguments: ["1.52.0", "1.53.1", "1.54.1", "1.55.0", "1.56.0", "1.56.2", "1.59.0", "1.59.2", "2.0.0", "1.54.0-beta", "1.56.1-beta", "1.59.1-beta"])
     func unsupportedVersionPreventsExecution(version: String) async throws {
         let installation = MoleInstallation(executableURL: URL(fileURLWithPath: "/does/not/exist"), version: version)
         do { _ = try await MoleService().applications(using: installation); Issue.record("未知版本应拒绝查询") }

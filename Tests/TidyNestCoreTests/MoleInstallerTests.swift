@@ -60,7 +60,7 @@ struct MoleInstallerTests {
         #expect(!FileManager.default.fileExists(atPath: wrong.root.appendingPathComponent("managed/1.53.0").path))
     }
 
-    @Test(arguments: ["1.54.0", "1.56.1"])
+    @Test(arguments: ["1.54.0", "1.56.1", "1.59.1"])
     func installerRejectsAnotherSupportedVersionInPinnedPackage(version: String) async throws {
         let fixture = try await InstallerFixture(version: version)
         await #expect(throws: MoleInstallError.self) { try await fixture.installer().install { _ in } }
