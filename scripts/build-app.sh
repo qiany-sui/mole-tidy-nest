@@ -2,19 +2,19 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_BUNDLE="$PROJECT_DIR/build/TidyNest.app"
+APP_BUNDLE="$PROJECT_DIR/build/mole-tidy-nest.app"
 ICONSET_DIR="$PROJECT_DIR/build/AppIcon.iconset"
 ICON_SOURCE="$PROJECT_DIR/build/app-icon.png"
 
 cd "$PROJECT_DIR"
-xcrun swift build --configuration release --product TidyNest
-xcrun swift build --configuration release --product TidyNestBridge
+xcrun swift build --configuration release --product MoleTidyNest
+xcrun swift build --configuration release --product MoleTidyNestBridge
 BINARY_DIR="$(xcrun swift build --configuration release --show-bin-path)"
 
 mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources" "$APP_BUNDLE/Contents/Helpers" "$ICONSET_DIR"
-cp "$BINARY_DIR/TidyNest" "$APP_BUNDLE/Contents/MacOS/TidyNest"
-cp "$BINARY_DIR/TidyNestBridge" "$APP_BUNDLE/Contents/Helpers/TidyNestBridge"
-ditto "$BINARY_DIR/TidyNest_TidyNestEngine.bundle" "$APP_BUNDLE/Contents/Resources/TidyNest_TidyNestEngine.bundle"
+cp "$BINARY_DIR/MoleTidyNest" "$APP_BUNDLE/Contents/MacOS/MoleTidyNest"
+cp "$BINARY_DIR/MoleTidyNestBridge" "$APP_BUNDLE/Contents/Helpers/MoleTidyNestBridge"
+ditto "$BINARY_DIR/MoleTidyNest_MoleTidyNestEngine.bundle" "$APP_BUNDLE/Contents/Resources/MoleTidyNest_MoleTidyNestEngine.bundle"
 cp "$PROJECT_DIR/Resources/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 
 xcrun swift "$PROJECT_DIR/scripts/make-icon.swift" "$ICON_SOURCE"
@@ -26,7 +26,7 @@ done
 iconutil --convert icns "$ICONSET_DIR" --output "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
 # 本地自用构建使用 ad-hoc 签名；正式发行需要独立的 Developer ID 流程。
-codesign --force --sign - "$APP_BUNDLE/Contents/Helpers/TidyNestBridge"
+codesign --force --sign - "$APP_BUNDLE/Contents/Helpers/MoleTidyNestBridge"
 codesign --force --sign - "$APP_BUNDLE"
 codesign --verify --deep --strict "$APP_BUNDLE"
 printf '已生成：%s\n' "$APP_BUNDLE"

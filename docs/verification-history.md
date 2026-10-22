@@ -1,4 +1,4 @@
-# TidyNest 历史验收记录
+# mole-tidy-nest 历史验收记录
 
 本文于 2026-10-22 从根目录 `AGENTS.md` 归档，保留原记录及当时的说明，不重新认定历史验证结果。
 
@@ -6,6 +6,17 @@
 - 记录中的测试数量、应用列表、系统环境与已安装版本均属于对应验收时点；不能据此声称当前代码已经验证。
 - `work/` 日志、备份和 fixture 路径均相对于项目根目录，只保留在本机，不随仓库提供；其他历史本机路径亦仅用于追溯。
 - 既有阶段记录见 [M1 计划与验收](m1-plan.md)、[M2 计划与验收](m2-plan.md)。
+- 2026-10-22 项目从 TidyNest（拾净）改名为 mole-tidy-nest；下文旧名称、模块和绝对路径按对应验收时点保留，不代表现行目录。
+
+## 2026-10-22 完整改名与显式数据迁移
+
+- 项目根目录改为 `mole-tidy-nest`，Swift 包、模块及可执行文件改为 `MoleTidyNest*`，App 为 `build/mole-tidy-nest.app`，Bundle ID 为 `local.mole-tidy-nest.app`。更新当前文档、桥接资源路径及 opt-in 环境变量；历史记录中的旧名和路径按原时点保留。9 份上游原始材料与改名前基线字节一致。
+- 新增 `MoleTidyNestMigration --check | --apply`，显式原位改名旧 Application Support/Caches 目录，不备份、不合并、不修改记录内容。先复核新旧进程、无链接父链和权限、旧执行/安装锁、保留事务对象及两个目标目录，移动失败时只对本次且身份未变的目录尝试排他回退。历史、防重放凭据和 Mole 安装随目录保留，旧计划须重新检查。
+- 13 项迁移测试覆盖字节及 inode 保留、重复运行、只读检查、第二目录冲突、源/祖先链接、运行实例、占用锁、不安全源/祖先权限、文件及空目录形式的保留事务、部分迁移后的续迁。独立只读审查发现的父链权限与空目录对象两项问题均先复现失败后修复，随后复核通过。
+- 根目录改名后移开旧 `.build`，从空缓存执行 `rtk proxy swift test --no-parallel`：141 XCTest 全部通过，233 Swift Testing 中 3 项 opt-in 跳过，实际执行 371 项。Apple Silicon、macOS 15.7.4、Xcode 26.3、Swift 6.2.4；既有系统授权测试有两条 `#require` 冗余编译告警，本轮未改动相关断言。
+- 新路径 release 构建及 `codesign --verify --deep --strict` 通过；核对最终 plist 标识、主程序、Bridge 和资源包，并从包内 Bridge 只读查询 capabilities，5 条规则及 subset-5 一致。原生隔离程序复用生产视图，检查 App 菜单、窗口和设置页新名称，以及侧栏 205/185 点宽度下单行完整显示；正常退出后保存隔离记录。
+- 未迁移真实旧数据、未替换 `/Applications` 中的旧 App、未执行真实移除，系统废纸篓及联网安装 opt-in 未启用；macOS 14、Intel、正式签名/公证未在本轮验收。Codex 的项目入口没有可用修改接口，自身界面自动化也被工具禁止，需手动重新关联新根目录。
+- 本机证据：`work/mole-rename-baseline.log`、`work/mole-rename-migration-red.log`、`work/mole-rename-review-red.log`、`work/mole-rename-review-green.log`、`work/mole-rename-final-test.log`、`work/mole-rename-final-build.log`、`work/mole-rename-package-check.json`、`work/mole-rename-native-result.json`、`work/mole-rename-upstream-check.json`。旧路径的构建缓存保留在忽略目录 `work/mole-rename-build-cache-before-directory-move/`，仅用于追溯，不作为新路径构建输入。
 
 ## 首次纳入 Git 时的记录
 

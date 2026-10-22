@@ -1,4 +1,4 @@
-# TidyNest（拾净）
+# mole-tidy-nest
 
 原生 macOS 应用，帮助你查看应用和磁盘占用，并在逐项核对后处理缓存、日志及支持的应用。使用 SwiftUI、AppKit 与独立维护引擎，复用 [Mole](https://github.com/tw93/Mole) 的查询能力和部分保护规则。
 
@@ -16,7 +16,7 @@
 
 ## 本地构建
 
-需要 macOS 和 Swift 6 工具链；项目部署目标为 macOS 14 及以上，使用 Swift Package Manager，不依赖外部 Swift 包。已在 Apple Silicon、macOS 15.7.4、Xcode 16.4 上验证。
+需要 macOS 和 Swift 6 工具链；项目部署目标为 macOS 14 及以上，使用 Swift Package Manager，不依赖外部 Swift 包。本轮构建与测试使用 Apple Silicon、macOS 15.7.4、Xcode 26.3（Swift 6.2.4）；历史环境见验收记录。
 
 在项目根目录运行：
 
@@ -25,9 +25,22 @@ swift test --no-parallel
 bash scripts/build-app.sh
 ```
 
-构建产物为 `build/TidyNest.app`，可从 Finder 打开。打包脚本会同时构建主程序、独立引擎与资源，生成本机架构的 ad-hoc 签名 App。
+构建产物为 `build/mole-tidy-nest.app`，可从 Finder 打开。打包脚本会同时构建主程序、独立引擎与资源，生成本机架构的 ad-hoc 签名 App。
 
 应用列表与磁盘查询支持已验证的 **Mole 1.53.0、1.54.0、1.56.1、1.59.1**，其他版本需验证后支持。已有安装会自动检测；未找到时，可在 App 内主动点击安装，下载固定 **1.53.0** 并校验摘要后安装到应用专属目录。不会自动升级 Mole 或修改 shell 配置。
+
+## 从 TidyNest 迁移
+
+项目及 App 现名为 `mole-tidy-nest`，Swift 模块采用 `MoleTidyNest*`，Bundle ID 为 `local.mole-tidy-nest.app`。首次启动新版前，退出新旧 App 并等待后台任务收尾，在项目根目录执行：
+
+```sh
+swift run MoleTidyNestMigration --check
+swift run MoleTidyNestMigration --apply
+```
+
+`--check` 只检查；`--apply` 将 `~/Library/Application Support/TidyNest` 和 `~/Library/Caches/TidyNest` 分别原位改名为 `MoleTidyNest`，不建立备份、不复制或合并。应用列表、操作记录、保护设置、引擎审计、防重放凭据和 App 专属 Mole 安装均随目录保留，记录中的历史路径不改写。迁移成功后只使用新版，旧维护计划需重新检查。
+
+工具会拒绝新旧目录同时存在、路径链接、不安全权限、运行中的 App、被占用的旧锁以及事务目录中的保留对象；遇到这些情况先处理提示，再重新检查。不要先启动新版创建新目录，也不要直接删除冲突目录。迁移不安装或替换 `/Applications` 中的 App；Bundle ID 变化后，首次确认系统移除时可能需要重新授予 Finder 自动化权限。
 
 ## 使用方式
 
@@ -59,11 +72,12 @@ bash scripts/build-app.sh
 
 | 目录 | 内容 |
 | --- | --- |
-| `Sources/TidyNest` | 原生界面与状态管理 |
-| `Sources/TidyNestCore` | 应用读取、Mole 查询、子进程及桥接客户端 |
-| `Sources/TidyNestProtocol` | App 与引擎共享的结构化协议 |
-| `Sources/TidyNestEngine` | 固定规则、计划、逐项处理与本地记录 |
-| `Sources/TidyNestBridge` | 独立引擎入口 |
+| `Sources/MoleTidyNest` | 原生界面与状态管理 |
+| `Sources/MoleTidyNestCore` | 应用读取、Mole 查询、子进程及桥接客户端 |
+| `Sources/MoleTidyNestProtocol` | App 与引擎共享的结构化协议 |
+| `Sources/MoleTidyNestEngine` | 固定规则、计划、逐项处理与本地记录 |
+| `Sources/MoleTidyNestBridge` | 独立引擎入口 |
+| `Sources/MoleTidyNestMigration` | 显式旧数据目录迁移入口 |
 | `Tests` | 查询、维护引擎及界面状态测试 |
 | `scripts` | 图标生成与本地 App 打包 |
 | `docs` | 设计、实施与验收记录 |
@@ -76,6 +90,6 @@ bash scripts/build-app.sh
 
 ## 来源与许可
 
-项目包含 Mole **V1.53.0** 的保护数据、规则移植与审计摘录。上游许可为 **GPL-3.0-or-later**；原文、固定版本摘要和移植差异保留在 [MoleUpstream](Sources/TidyNestEngine/Resources/MoleUpstream/README.md)，许可原文见该目录的 [LICENSE](Sources/TidyNestEngine/Resources/MoleUpstream/LICENSE)。原始 shell 摘录仅供审计，不作为清理或卸载脚本执行。
+项目包含 Mole **V1.53.0** 的保护数据、规则移植与审计摘录。上游许可为 **GPL-3.0-or-later**；原文、固定版本摘要和移植差异保留在 [MoleUpstream](Sources/MoleTidyNestEngine/Resources/MoleUpstream/README.md)，许可原文见该目录的 [LICENSE](Sources/MoleTidyNestEngine/Resources/MoleUpstream/LICENSE)。原始 shell 摘录仅供审计，不作为清理或卸载脚本执行。
 
-项目级开源许可将在正式发布前确认；当前来源说明不额外授予上游许可之外的权利。TidyNest 使用独立品牌，与 Mole 官方 App 无隶属关系。
+项目级开源许可将在正式发布前确认；当前来源说明不额外授予上游许可之外的权利。mole-tidy-nest 使用独立品牌，与 Mole 官方 App 无隶属关系。

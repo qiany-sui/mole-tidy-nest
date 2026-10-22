@@ -2,21 +2,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "TidyNest",
+    name: "MoleTidyNest",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "TidyNestCore", targets: ["TidyNestCore"]),
-        .executable(name: "TidyNest", targets: ["TidyNest"]),
-        .executable(name: "TidyNestBridge", targets: ["TidyNestBridge"])
+        .library(name: "MoleTidyNestCore", targets: ["MoleTidyNestCore"]),
+        .executable(name: "MoleTidyNest", targets: ["MoleTidyNest"]),
+        .executable(name: "MoleTidyNestBridge", targets: ["MoleTidyNestBridge"]),
+        .executable(name: "MoleTidyNestMigration", targets: ["MoleTidyNestMigration"])
     ],
     targets: [
-        .target(name: "TidyNestProtocol"),
-        .target(name: "TidyNestCore", dependencies: ["TidyNestProtocol"]),
-        .target(name: "TidyNestEngine", dependencies: ["TidyNestCore", "TidyNestProtocol"], resources: [.copy("Resources/MoleUpstream")]),
-        .executableTarget(name: "TidyNestBridge", dependencies: ["TidyNestEngine", "TidyNestProtocol"]),
-        .executableTarget(name: "TidyNest", dependencies: ["TidyNestCore", "TidyNestProtocol"]),
-        .testTarget(name: "TidyNestCoreTests", dependencies: ["TidyNestCore", "TidyNestProtocol"]),
-        .testTarget(name: "TidyNestEngineTests", dependencies: ["TidyNestEngine", "TidyNestProtocol", "TidyNestCore"]),
-        .testTarget(name: "TidyNestUITests", dependencies: ["TidyNest", "TidyNestCore", "TidyNestProtocol"])
+        .target(name: "MoleTidyNestProtocol"),
+        .target(name: "MoleTidyNestCore", dependencies: ["MoleTidyNestProtocol"]),
+        .target(name: "MoleTidyNestEngine", dependencies: ["MoleTidyNestCore", "MoleTidyNestProtocol"], resources: [.copy("Resources/MoleUpstream")]),
+        .executableTarget(name: "MoleTidyNestBridge", dependencies: ["MoleTidyNestEngine", "MoleTidyNestProtocol"]),
+        .executableTarget(name: "MoleTidyNest", dependencies: ["MoleTidyNestCore", "MoleTidyNestProtocol"]),
+        .executableTarget(name: "MoleTidyNestMigration", dependencies: ["MoleTidyNestCore"]),
+        .testTarget(name: "MoleTidyNestCoreTests", dependencies: ["MoleTidyNestCore", "MoleTidyNestProtocol"]),
+        .testTarget(name: "MoleTidyNestEngineTests", dependencies: ["MoleTidyNestEngine", "MoleTidyNestProtocol", "MoleTidyNestCore"]),
+        .testTarget(name: "MoleTidyNestUITests", dependencies: ["MoleTidyNest", "MoleTidyNestCore", "MoleTidyNestProtocol"])
     ]
 )

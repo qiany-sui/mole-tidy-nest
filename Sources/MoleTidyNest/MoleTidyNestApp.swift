@@ -1,0 +1,87 @@
+import AppKit
+import SwiftUI
+import MoleTidyNestCore
+
+@main
+struct MoleTidyNestApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    @State private var model = WorkspaceModel(
+        maintenance: MaintenanceModel(operationHistory: OperationHistoryModel(store: .standard)),
+        applicationCache: .standard
+    )
+
+    var body: some Scene {
+        WindowGroup("mole-tidy-nest") {
+            RootView(model: model)
+                .background(WindowCloseGuard(model: model))
+                .tint(NestStyle.green)
+                .frame(minWidth: 980, minHeight: 640)
+                .task {
+                    appDelegate.model = model
+                    model.start()
+                }
+                .onDisappear { model.cancelOperation() }
+        }
+        .defaultSize(width: 1180, height: 760)
+        .windowStyle(.hiddenTitleBar)
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+            SearchCommands()
+        }
+        Settings {
+            SettingsView(model: model)
+                .tint(NestStyle.green)
+        }
+    }
+}
+
+private struct SearchActionKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+
+extension FocusedValues {
+    var searchAction: (() -> Void)? {
+        get { self[SearchActionKey.self] }
+        set { self[SearchActionKey.self] = newValue }
+    }
+}
+
+private struct SearchCommands: Commands {
+    @FocusedValue(\.searchAction) private var searchAction
+
+    var body: some Commands {
+        CommandGroup(after: .textEditing) {
+            Button("搜索") { searchAction?() }
+                .keyboardShortcut("f", modifiers: .command)
+                .disabled(searchAction == nil)
+        }
+    }
+}
+
+@MainActor
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    weak var model: WorkspaceModel?
+    private var terminationRequested = false
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApplication.shared.setActivationPolicy(.regular)
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard let model else { return .terminateNow }
+        if !terminationRequested {
+            let cancel: Bool
+            if model.maintenance.isExecuting {
+                guard let choice = maintenanceExitChoice(action: "退出") else { return .terminateCancel }
+                cancel = choice
+            } else { cancel = true }
+            terminationRequested = true
+            Task {
+                await model.prepareToTerminate(cancelMaintenance: cancel)
+                sender.reply(toApplicationShouldTerminate: true)
+            }
+        }
+        return .terminateLater
+    }
+}

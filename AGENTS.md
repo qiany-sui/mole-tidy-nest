@@ -1,6 +1,8 @@
-# TidyNest（拾净）
+# mole-tidy-nest
 
 原生 macOS 的 Mole 配套工具：SwiftUI＋必要的 AppKit＋独立 Mole 适配层。macOS 14+、Swift 6、Swift Package Manager；不引入外部包依赖。
+
+项目及 App 名为 `mole-tidy-nest`，Swift 模块为 `MoleTidyNest*`，Bundle ID 为 `local.mole-tidy-nest.app`，数据目录为 `MoleTidyNest`。旧名 `TidyNest` 仅用于迁移兼容和历史记录。
 
 M1 查询与 M2 维护规则子集已实现；本文件保存现行协作规则与行为约束。历史设计、计划和验收结果按文末索引读取，不作为本轮验证或操作授权。
 
@@ -41,7 +43,7 @@ M1 查询与 M2 维护规则子集已实现；本文件保存现行协作规则�
 - 1.56.1/1.59.1 磁盘 JSON 的报告及条目 `scan_status` 均须为 `complete`；部分、不可用或未知状态报错并保留上次报告。旧版缺字段兼容；`large_files` 可缺省，未知占用与零占用不同，错误输出不能猜测为有效结果。M1 查询可能更新 Mole 自身缓存或日志。
 - 优先复用 `/opt/homebrew/bin`、`/usr/local/bin`、`~/.local/bin` 下已有 Mole；检测错误及不支持版本不能当成缺失。仅缺失时提供安装按钮，用户点击后下载固定 1.53.0，严格核对包版本，支持进度、取消、失败重试及安装后检测。
 - `MoleInstaller` 使用固定官方源码及对应架构辅助程序的 SHA-256，完整校验后提取运行白名单，不执行上游安装脚本。使用私有暂存目录、安装锁和同卷排他发布；失败只清理本次暂存目录，不覆盖已有版本。
-- 安装到 `~/Library/Application Support/TidyNest/Mole/1.53.0/mole`，仅供本 App 自动发现；不修改 shell 配置，不依赖 Homebrew，不使用 sudo、自动升级或 latest 回退。固定来源及摘要见 [MoleUpstream](Sources/TidyNestEngine/Resources/MoleUpstream/README.md)。
+- 安装到 `~/Library/Application Support/MoleTidyNest/Mole/1.53.0/mole`，仅供本 App 自动发现；不修改 shell 配置，不依赖 Homebrew，不使用 sudo、自动升级或 latest 回退。固定来源及摘要见 [MoleUpstream](Sources/MoleTidyNestEngine/Resources/MoleUpstream/README.md)。
 
 ## 并发、取消与退出
 
@@ -54,13 +56,14 @@ M1 查询与 M2 维护规则子集已实现；本文件保存现行协作规则�
 
 | 位置 | 职责与限制 |
 | --- | --- |
-| `Sources/TidyNestCore` | 数据模型、查询白名单、应用读取、子进程适配与桥接客户端；不依赖 SwiftUI |
-| `Sources/TidyNest` | 原生界面及界面状态；通过 Core/协议访问引擎 |
-| `Sources/TidyNestProtocol` | App 与独立引擎共享的结构化协议 |
-| `Sources/TidyNestEngine` / `Sources/TidyNestBridge` | 固定规则、计划存储、同卷隔离移动、系统 Trash 与本地记录 |
-| `Sources/TidyNestEngine/Resources/MoleUpstream` | 固定 1.53.0 的来源、GPL 许可和审计材料；保留摘录原文末尾空行，不执行原始 shell |
-| `Tests/TidyNestCoreTests` | 解析失败、参数边界、取消、查询、缓存及存储等行为测试 |
-| `Tests/TidyNestEngineTests` / `Tests/TidyNestUITests` | 引擎保护与界面状态回归 |
+| `Sources/MoleTidyNestCore` | 数据模型、查询白名单、应用读取、子进程适配与桥接客户端；不依赖 SwiftUI |
+| `Sources/MoleTidyNest` | 原生界面及界面状态；通过 Core/协议访问引擎 |
+| `Sources/MoleTidyNestProtocol` | App 与独立引擎共享的结构化协议 |
+| `Sources/MoleTidyNestEngine` / `Sources/MoleTidyNestBridge` | 固定规则、计划存储、同卷隔离移动、系统 Trash 与本地记录 |
+| `Sources/MoleTidyNestMigration` | 显式旧数据迁移 CLI，复用 Core 的目录核验与迁移实现 |
+| `Sources/MoleTidyNestEngine/Resources/MoleUpstream` | 固定 1.53.0 的来源、GPL 许可和审计材料；保留摘录原文末尾空行，不执行原始 shell |
+| `Tests/MoleTidyNestCoreTests` | 解析失败、参数边界、取消、查询、缓存及存储等行为测试 |
+| `Tests/MoleTidyNestEngineTests` / `Tests/MoleTidyNestUITests` | 引擎保护与界面状态回归 |
 | `scripts` | 本地构建及 App 打包；产物放 `build/`，临时验证放 `work/` |
 
 - 中文界面和中文注释；注释解释原因，保持改动小且可验证。shell 命令使用 `rtk` 前缀，可用 `rtk proxy` 执行原命令。
@@ -75,7 +78,7 @@ M1 查询与 M2 维护规则子集已实现；本文件保存现行协作规则�
 - 侧栏顺序为「应用、清理、磁盘、操作记录」；每次启动进入「应用」，不记住上次页面，不自动扫描。仅恢复上次成功列表并检测 Mole，点击「读取应用」或「刷新列表」后才查询。
 - 普通 Mole 检测进度和取消放在侧栏，不显示顶部加载横幅、不挤动主内容；缺失、失败、不支持版本、取消后的重试提示及安装进度仍在主区显示。检测完成前不提前启用查询。
 - 全量刷新保留旧列表、搜索和选中项并显示更新时间；失败/取消保留旧结果。缓存中的应用可直接检查移除计划，无需先刷新。`unknown` 标识在首次检查及重新检查时，由现有维护任务内的安全单项读取补全，再交引擎独立核验；保留所选外层路径，不改列表缓存，不自动替换已有真实标识冲突。
-- 「刷新此应用」仅更新目标名称、Bundle ID 和包体积，来源及卸载名称沿用列表记录；保留完整列表时间、其他记录、搜索与选择。失败/取消保留旧信息，仍可独立检查移除计划；引擎仍复核安装集合和保护规则。列表缓存为 `~/Library/Caches/TidyNest/applications.json`。
+- 「刷新此应用」仅更新目标名称、Bundle ID 和包体积，来源及卸载名称沿用列表记录；保留完整列表时间、其他记录、搜索与选择。失败/取消保留旧信息，仍可独立检查移除计划；引擎仍复核安装集合和保护规则。列表缓存为 `~/Library/Caches/MoleTidyNest/applications.json`。
 - 名称或占用降序排序，未知占用排末尾；搜索匹配名称、应用包文件名和 Bundle ID，大小写不敏感并规范化空白。排序仅用显示体积，兼容 Mole 固定单位和系统本地化单位，不修改原列表、缓存及更新时间。
 - 「检查移除计划」位于应用名称和占用下方，沿用安全门槛；压缩标题与常驻状态间距，长错误自动换行，保留列表更新时间。应用与计划搜索支持 ⌘F；侧栏向辅助功能标记当前页。
 
@@ -98,28 +101,30 @@ M1 查询与 M2 维护规则子集已实现；本文件保存现行协作规则�
 ### 操作记录与分栏
 
 - 记录覆盖应用全量/单项刷新、磁盘读取、清理/移除计划检查和实际移除，保存结束时间、类型、目标及结果，失败/取消也记录。启动检测、缓存恢复、搜索/选择和历史刷新不记，过去未记录的查询不补录。
-- 页面快照为 `~/Library/Application Support/TidyNest/operation-history.json`，有界私有原子保存；本地 I/O 在独立串行后台队列。记录先显示，精确删除保存成功后才更新页面；损坏文件不覆盖，会话结果保留并显示存储错误，恢复读取后补存会话记录，退出等待排队保存。
+- 页面快照为 `~/Library/Application Support/MoleTidyNest/operation-history.json`，有界私有原子保存；本地 I/O 在独立串行后台队列。记录先显示，精确删除保存成功后才更新页面；损坏文件不覆盖，会话结果保留并显示存储错误，恢复读取后补存会话记录，退出等待排队保存。
 - 旧引擎执行结果按 runID 导入去重。单条删除/清空都确认精确 ID 集合，执行记录删除标记防止重开或刷新再导入；只清页面，不删引擎审计、防重放凭据或实际文件。
 - 页面切换保留所选记录。执行结果显示各状态数量及「全部／需要核对」，后者仅含失败和未知结果，保留原始顺序与恢复位置。
 - 应用、磁盘、维护计划及记录详情均使用稳定分栏宿主，避免选择引起宽度跳动。
 
 ## 构建与验证
 
+- 旧数据通过 `rtk proxy swift run MoleTidyNestMigration --check` 检查，`--apply` 显式原位改名 Application Support/Caches 下的 `TidyNest` 为 `MoleTidyNest`，不备份、不合并、不改写记录。首次启动新版前退出新旧 App，冲突、链接、占用锁或保留事务对象均停止；迁移后仅使用新版，旧计划需重新检查。自动化只迁移隔离 fixture；真实数据迁移需用户明确授权，详见 [README](README.md#从-tidynest-迁移)。
+
 | 用途 | 命令与产物 |
 | --- | --- |
 | 默认全量测试 | `rtk proxy swift test --no-parallel` |
-| 本地 App | `rtk proxy bash scripts/build-app.sh` → `build/TidyNest.app` |
-| 显式联网安装验收 | `rtk proxy env TIDYNEST_VERIFY_MOLE_INSTALL=1 swift test --filter officialMoleInstallsAndRunsFromPublishedDirectory` |
+| 本地 App | `rtk proxy bash scripts/build-app.sh` → `build/mole-tidy-nest.app` |
+| 显式联网安装验收 | `rtk proxy env MOLE_TIDY_NEST_VERIFY_MOLE_INSTALL=1 swift test --filter officialMoleInstallsAndRunsFromPublishedDirectory` |
 
 - 显式关闭测试并行，避免本机高负载触发现有脚本 fixture 的 3 秒启动窗口；不放宽生产超时或测试断言。
 - 默认测试不联网；2 项系统废纸篓验证和 1 项联网安装验证需显式启用。联网安装只在项目 `work/` 新建目录，从最终安装目录检测版本并查询新建空目录。
-- 最近记录基线为 2026-10-13：默认实际执行 358 项（141 XCTest＋220 Swift Testing 中 3 项 opt-in 跳过）。这是历史结果，不代表当前改动已经通过；细分计数和证据见 [历史验收记录](docs/verification-history.md)。
+- 最近记录基线为 2026-10-22：默认实际执行 371 项（141 XCTest＋233 Swift Testing 中 3 项 opt-in 跳过），含 13 项迁移测试。这是已记录时点的结果，不代表后续改动已经通过；证据见 [历史验收记录](docs/verification-history.md)。
 - 必须区分编译检查、自动化测试和真实界面验证，不把未测项说成通过。当前为本机架构 ad-hoc 签名构建；macOS 14 实机、Intel、正式发行签名/公证及受隐私权限保护目录尚未验收。
 
 ## 版本控制与发布
 
 - 使用本地 Git，默认分支 `main`。构建产物、验收 fixture、应用备份和本地环境文件不提交。
-- 当前仅整理本地版本；未获新的明确指令前，不创建远程仓库、不配置远程地址、不推送。功能打磨完成后由用户决定是否发布公开的 `tidy-nest` 仓库。
+- 当前仅整理本地版本；未获新的明确指令前，不创建远程仓库、不配置远程地址、不推送。功能打磨完成后由用户决定是否发布公开的 `mole-tidy-nest` 仓库。
 - 对外发布前确认项目级开源许可，保留现有 Mole 来源、GPL 材料及审计摘录。
 - 提交仅在需要时进行；先查 status/diff，只暂存本次相关文件，不默认 `git add .`。消息格式为 `[ai] <type>(<scope>): <中文说明>`；type 限 feat/fix/refactor/docs/style/test/chore，scope 可省略，单行不超过 72 字符。
 
