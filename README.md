@@ -55,7 +55,7 @@ bash scripts/build-app.sh
 
 ## 开发与验证
 
-默认测试使用隔离 fixture。系统废纸篓与联网安装验收需显式启用，不属于默认测试范围。具体命令和实际验收记录见 [AGENTS.md](AGENTS.md)。
+默认测试使用隔离 fixture。系统废纸篓与联网安装验收需显式启用，不属于默认测试范围。现行协作规则和验证命令见 [AGENTS.md](AGENTS.md)，过往验证结果与本机日志位置见 [历史验收记录](docs/verification-history.md)。
 
 | 目录 | 内容 |
 | --- | --- |

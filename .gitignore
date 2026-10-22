@@ -11,4 +11,9 @@ xcuserdata/
 .env.*
 !.env.example
 .idea/
-docs/
+# 仅纳入协作入口引用的文档，其他本地资料继续忽略。
+/docs/*
+!/docs/design.md
+!/docs/m1-plan.md
+!/docs/m2-plan.md
+!/docs/verification-history.md
