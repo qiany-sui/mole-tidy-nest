@@ -8,6 +8,14 @@
 - 既有阶段记录见 [M1 计划与验收](m1-plan.md)、[M2 计划与验收](m2-plan.md)。
 - 2026-10-22 项目从 TidyNest（拾净）改名为 mole-tidy-nest；下文旧名称、模块和绝对路径按对应验收时点保留，不代表现行目录。
 
+## 2026-10-23 Mole 1.62.0 兼容
+
+- 共用查询白名单新增 1.62.0，检测、查询前实际版本复核、引擎安装集合与界面门槛同步支持；固定安装包 1.53.0 及维护规则 subset-5 保留。核对官方应用列表六字段 JSON 与磁盘字段兼容，扫描状态文本仍为 complete/partial/unavailable；磁盘 JSON 实现相较 1.59.1 仅调整排序调用。非完整扫描继续报错并保留旧报告。
+- 扩展既有参数化回归，覆盖新版本查询、运行中升级、未知邻近版本与预发布版本拦截、安装器固定包限制和界面启用。先复现 1.62.0 查询被拒及界面禁用，再修改白名单；最终默认 371 项通过（141 XCTest＋233 Swift Testing 中 3 项 opt-in 跳过），独立只读审查无可行动问题。
+- 本机 Mole 1.62.0 真实应用列表解析 74 项，生产引擎完整安装集合读取 138 项；新建空目录、中文空格路径、普通文件和大文件查询通过。release 构建、严格签名及安装后主程序/Bridge 摘要核对通过，完整备份后替换 `/Applications/mole-tidy-nest.app`，启动成功并确认正式路径下的进程运行。
+- 验证及启动后，列表缓存、页面记录与引擎 History/Consumed/Journals 共 23 个文件的内容和修改时间不变；未确认或执行真实移除。查询在服务层验证，本轮未做原生界面交互、真实权限故障注入、macOS 14 或 Intel 实机验证；系统废纸篓及联网安装 opt-in 未启用。
+- 本机证据：`work/mole-1620-red.log`、`work/mole-1620-full.log`、`work/mole-1620-build.log`、`work/mole-1620-qa/service-engine-result.json`、`work/mole-1620-qa/launch-result.json`；备份及安装核对见 `work/mole-1620-install.json`。
+
 ## 2026-10-22 完整改名与显式数据迁移
 
 - 项目根目录改为 `mole-tidy-nest`，Swift 包、模块及可执行文件改为 `MoleTidyNest*`，App 为 `build/mole-tidy-nest.app`，Bundle ID 为 `local.mole-tidy-nest.app`。更新当前文档、桥接资源路径及 opt-in 环境变量；历史记录中的旧名和路径按原时点保留。9 份上游原始材料与改名前基线字节一致。

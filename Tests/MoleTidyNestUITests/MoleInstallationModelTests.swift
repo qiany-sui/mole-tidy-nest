@@ -90,7 +90,7 @@ final class MoleInstallationModelTests: XCTestCase {
     }
 
     func testVerifiedMoleDetectionEnablesManualQueriesAndMaintenance() async {
-        for version in ["1.54.0", "1.56.1", "1.59.1"] {
+        for version in ["1.54.0", "1.56.1", "1.59.1", "1.62.0"] {
             let queries = InstallationApplicationQueries()
             let maintenance = inertMaintenance()
             let model = WorkspaceModel(detect: { installedMole(version: version) }, applications: { installation in

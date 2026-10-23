@@ -3,7 +3,7 @@ import Foundation
 public struct MoleInstallation: Sendable, Equatable {
     public let executableURL: URL
     public let version: String
-    public static let supportedVersions = ["1.53.0", "1.54.0", "1.56.1", "1.59.1"]
+    public static let supportedVersions = ["1.53.0", "1.54.0", "1.56.1", "1.59.1", "1.62.0"]
     public var isSupported: Bool { Self.supportedVersions.contains(version) }
 
     public init(executableURL: URL, version: String) {
